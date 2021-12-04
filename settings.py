@@ -31,6 +31,8 @@ CLASS_TYPE_2 = {
 CLASS_TYPE = {0:CLASS_TYPE_0, 1:CLASS_TYPE_1, 2:CLASS_TYPE_2}
 SETTINGS['class_setting'] = CLASS_TYPE
 
+COST_TYPE=(1,2,3) # could cost how many classes each time
+SETTINGS['cost_type'] = COST_TYPE
 
 def load_settings():
     try:
