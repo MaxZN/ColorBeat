@@ -2,7 +2,10 @@
 import os
 import pickle
 import sys
+import math
 from datetime import datetime
+
+from utils import save_pkl, load_pkl, get
 
 SETTINGS ={}
 
@@ -34,25 +37,24 @@ SETTINGS['class_setting'] = CLASS_TYPE
 COST_TYPE=(1,2,3) # could cost how many classes each time
 SETTINGS['cost_type'] = COST_TYPE
 
-def load_settings():
-    try:
-        with open('settings.pkl', 'rb') as f:
-            set = pickle.load(f)
-    except:
-        set = SETTINGS
-    return set
+SELLWEIGHT={
+    'IntroWeight': 0.01, 'coWeight': 0.01, 
+}
+SETTINGS['sell_weight'] = SELLWEIGHT
+
+FEES={
+    'assistfee': 8
+}
+SETTINGS['fees'] = FEES
+
+def load_settings(filename=None):
+    if filename is None:
+        return SETTINGS
+    else:
+        return load_pkl(filename)
 
 def main():
     filename = sys.argv[1]
-    d = datetime.now()
-    curtime = d.strftime('%m%d_%H%M%S')
-    oldname = '{}.bk.{}'.format(filename, curtime)
-    if os.path.exists(filename):
-        os.rename(filename, oldname)
-
-    with open(filename, 'wb') as fo:
-        pickle.dump(SETTINGS, fo)
-        fo.close()
-
+    save_pkl(filename, SETTINGS)
 if __name__ == '__main__':
     main()

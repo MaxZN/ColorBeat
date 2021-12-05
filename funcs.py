@@ -1,9 +1,13 @@
 import numpy as np
+import pickle
+import os
+
 import settings
 from datetime import datetime
+from utils import save_pkl, load_pkl
 
-set = settings.load_settings()
-class_set = set['class_setting']
+SETFILE = 'settings.pkl'
+sets = settings.load_settings(SETFILE)
 
 class Check:
     def __init__(self) -> None:
@@ -15,14 +19,19 @@ class Check:
         pass
     
     def sell_info(self, cnt, class_type):
+        class_set = sets['class_setting']
+
         assert cnt in class_set.keys()
         assert class_type in class_set[cnt].keys()
         pass
 
-    def cost_info(self, date_str, cost_num):
-        assert type(date_str)==str
+    def date_info(self, date_str):
         assert datetime.strptime(date_str, "%Y_%m%d_%H%M")
 
-        assert cost_num in set['cost_type'] # 1,2,3
+    def cost_info(self, date_str, cost_num):
+        assert type(date_str)==str
+        self.date_info(date_str)
+
+        assert cost_num in sets['cost_type'] # 1,2,3
         pass
 

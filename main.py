@@ -1,6 +1,6 @@
 
 import sys
-from cb_sys import
+from cb_sys import Student
 #这里我们提供必要的引用。基本控件位于pyqt5.qtwidgets模块中。
 from PyQt5.QtWidgets import QApplication, QWidget
 
