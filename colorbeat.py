@@ -13,6 +13,11 @@ class ColorBeat(object):
         assert type(data_stu) == StudentAllInfo
         assert type(data_tea) == TeacherAllInfo
         assert type(data_lesson) == YearMap
+
+        data_stu.load_dict()
+        data_tea.load_dict()
+        data_lesson.load_dict()
+
         self.data_stu = data_stu
         self.data_tea = data_tea
         self.data_lesson = data_lesson
@@ -36,10 +41,6 @@ def main():
     data_stu = StudentAllInfo()
     data_tea = TeacherAllInfo()
     data_lesson = YearMap()
-
-    data_stu.load_dict()
-    data_tea.load_dict()
-    data_lesson.load_dict()
 
     colorbeat.loading_database(data_stu, data_tea, data_lesson)
 
