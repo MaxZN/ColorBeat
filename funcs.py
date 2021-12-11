@@ -6,8 +6,7 @@ import settings
 from datetime import datetime
 from utils import save_pkl, load_pkl
 
-SETFILE = 'settings.pkl'
-sets = settings.load_settings(SETFILE)
+sets = settings.load_settings(settings.SETFILE)
 
 class Check:
     def __init__(self) -> None:

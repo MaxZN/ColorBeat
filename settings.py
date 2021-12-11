@@ -5,8 +5,9 @@ import sys
 import math
 from datetime import datetime
 
-from utils import save_pkl, load_pkl, get
+from utils import save_pkl, load_pkl
 
+SETFILE='settings.pkl'
 SETTINGS ={}
 
 CLASS_TYPE = {}
@@ -32,19 +33,13 @@ CLASS_TYPE_2 = {
 }
 
 CLASS_TYPE = {0:CLASS_TYPE_0, 1:CLASS_TYPE_1, 2:CLASS_TYPE_2}
-SETTINGS['class_setting'] = CLASS_TYPE
-
 COST_TYPE=(1,2,3) # could cost how many classes each time
+SELLWEIGHT={'IntroWeight': 0.01, 'coWeight': 0.01}
+FEES={'assistfee': 8}
+
+SETTINGS['class_setting'] = CLASS_TYPE
 SETTINGS['cost_type'] = COST_TYPE
-
-SELLWEIGHT={
-    'IntroWeight': 0.01, 'coWeight': 0.01, 
-}
 SETTINGS['sell_weight'] = SELLWEIGHT
-
-FEES={
-    'assistfee': 8
-}
 SETTINGS['fees'] = FEES
 
 def load_settings(filename=None):
@@ -54,7 +49,10 @@ def load_settings(filename=None):
         return load_pkl(filename)
 
 def main():
-    filename = sys.argv[1]
+    try:
+        filename = sys.argv[1]
+    except IndexError:
+        filename = SETFILE
     save_pkl(filename, SETTINGS)
 if __name__ == '__main__':
     main()

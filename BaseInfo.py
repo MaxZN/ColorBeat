@@ -5,10 +5,9 @@ import calendar
 
 import settings
 from funcs import Check
-from utils import save_pkl, load_pkl, get_sells_weight
+from utils import save_pkl, load_pkl, get_sells_weight, get_time
 
-SETFILE = 'settings.pkl'
-sets = settings.load_settings(SETFILE)
+sets = settings.load_settings(settings.SETFILE)
 ck = Check()
 
 class SellInfo:
@@ -61,12 +60,27 @@ class TeacherInfo:
         self.lessonfee = lessonfee
         self.base = base
         self.fee_list = {}
+        self.formal_list = {}
+        self.assist_list = {}
     
     def update_info(self, base=None, lessonfee=None):
         if base is not None:
             self.base = base
         if lessonfee is not None:
             self.lessonfee = lessonfee
+    
+    def update_learned(self, date_str, cost_time, is_formal=True):
+        ck.cost_info(date_str, cost_time)
+        # TODO
+        if date_str not in self.formal_list:
+            self.formal_list[date_str] = 0
+            self.assist_list[date_str] = 0 #TODO
+        if is_formal:
+            pass
+
+        self.class_learned_dates[cost_time].append(date_str)
+        self.class_res -= cost_time
+        self.print()
     
     def get_monthly_fee(self, year, month, tax=0, 
         intern = 0, ill=0, 
@@ -118,50 +132,13 @@ class TeacherAllInfo:
         assert type(personal)==TeacherAllInfo
         self.teacher_dict[id] = personal
 
-class LessonInfo:
-    '''
-    te, phone, base: 基础薪资, lessonfee: 课时费
-    SellType: 
-    >> IntroValue: 课程转化费(income); 
-    >> b_co: 是否合作;
-    
-    WorkDay: normal: 正常上班; intern: 试用; 
-    SellMoney: IntroValue=0, CoSell=0, IndiSell=0
-    LessonType: assist: 助教; formal: 正式; 
-    '''
-    def __init__(self, 
-        lessontime='1900_0101_0000', cost_type=1,
-        studentnum=0, teacher='yiyi', assist=None):
-        ck.date_info(lessontime)
-        self.lessontime = lessontime
-        self.studentnum = studentnum
-        self.teacher = teacher
-        self.assist = assist
-        self.cost_type = cost_type
-        self.fee_list = {}
-    
-    def update_info(self, base=None, lessonfee=None):
-        if base is not None:
-            self.base = base
-        if lessonfee is not None:
-            self.lessonfee = lessonfee
-    
-    def get_monthly_fee(self, year, month, tax=0, intern=0, 
-        IntroValue=0, CoSell=0, IndiSell=0,
-        assist=0, formal=0):
-
-        date_str = '{}_{:02d}'.format(year, month)
-        alldays = calendar.monthrange(year, month)[1]
-        normal = alldays - intern
-        fee_list = {}
-
 class StudentInfo:
     def __init__(self, 
         name, lname=None, gender=0, #0:male, 1:female
         age=0,
         phone=13800000000,
         class_sell = (0,0,0), # times_per_week, class_type, class_num
-        ps_info=ps_info):
+        ps_info='blank Info'):
         self.name = name
         self.lname = lname
         self.age = age
@@ -223,11 +200,9 @@ class StudentInfo:
     def update_ps(self, ps_info):
         self.ps_info.append(ps_info)
 
-
-
 class StudentAllInfo:
     def __init__(self) -> None:
-        self.cur_id = 0
+        self.cur_id = 1
         self.student_dict = {} # id: StudentInfo
     
     def save_dict(self):
@@ -265,6 +240,70 @@ class StudentAllInfo:
     def modify_info(self, personal, id):
         assert type(personal)==StudentInfo
         self.student_dict[id] = personal
+
+class LessonInfo:
+    '''
+    lessontime='1900_0101_0000', cost_type=1,
+    studentnum=0, teacher='yiyi', assist=None
+    '''
+    def __init__(self, 
+        lessontime='1900_0101_0000', cost_time=1):
+
+        ck.date_info(lessontime)
+        self.lessontime = lessontime
+        self.cost_time = cost_time
+
+        self.student_list = [] # idlist
+        self.teacher = 0 # idlist
+        self.assist = 0 # idlist
+
+    def load_detail(self,
+        students=[], teacher=0, assist=0):
+        self.student_list = students
+        self.teacher = teacher
+        self.assist = assist
+
+class LessonAllInfo:
+    def __init__(self):
+        self.lesson_all = {}
+        self.lesson_all[1900]={}
+        self.lesson_all[1900][1]={}
+        self.lesson_all[1900][1][1]={}
+    
+    def save_dict(self):
+        save_pkl(filename='Lesson_All_Info.pkl', dic=self.lesson_all)
+
+    def load_dict(self):
+        self.lesson_all = load_pkl(filename='Lesson_All_Info.pkl')
+    
+    def update_info(self, lessoninfo):
+        assert type(lessoninfo)==LessonInfo
+        lessontime = lessoninfo.lessontime
+        year, month, day, hm = get_time(lessontime)
+        if year not in self.lesson_all.keys():
+            self.lesson_all[year] = {}
+        if month not in self.lesson_all[year].keys():
+            self.lesson_all[year][month] = {}
+        if day not in self.lesson_all[year][month].keys():
+            self.lesson_all[year][month][day] = {}
+        self.lesson_all[year][month][day][hm] = lessoninfo
+    
+    def update_student_from_lesson(self, lessoninfo, studentall):
+        for name in lessoninfo.student_list:
+            assert name in studentall.keys()
+            sinfo = studentall[name]
+            assert type(sinfo)==StudentInfo
+            sinfo.update_learned(lessoninfo.lessontime, lessoninfo.cost_time)
+
+    def update_teacher_from_lesson(self, lessoninfo, teacherall):
+        for name in lessoninfo.student_list:
+            assert name in teacherall.keys()
+            tinfo = teacherall[name]
+            assert type(tinfo)==TeacherInfo
+            tinfo.update_learned(lessoninfo.lessontime, lessoninfo.cost_time)
+
+
+
 
 def main():
     a = StudentInfo('haha')
